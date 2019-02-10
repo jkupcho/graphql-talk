@@ -1,6 +1,7 @@
 const express = require('express');
-const { ApolloServer, gql } = require('apollo-server-express');
+const { ApolloServer, gql, ApolloError } = require('apollo-server-express');
 const customerRepository = require('./repositories/customerRepository');
+const db = require('./db');
 
 // Construct a schema, using GraphQL schema language
 const typeDefs = gql`
@@ -25,6 +26,12 @@ const typeDefs = gql`
   }
 `;
 
+class AddressNotFound extends ApolloError {
+  constructor(message) {
+    super(message);
+  }
+}
+
 // Provide resolver functions for your schema fields
 const resolvers = {
   Query: {
@@ -33,11 +40,15 @@ const resolvers = {
     }
   },
   // Example List Resolver.
-  // Person: {
-  //   address: (person) => {
-  //     return person.address ? person.address : { street: "not found!" }
-  //   }
-  // }
+  Customer: {
+    address: (customer, args, context, info) => {
+      if (!customer.address) {
+        // this allows an error object to show along with data.
+        throw new AddressNotFound(`No address for customer: ${customer.id}`);
+      }
+      return customer.address;
+    }
+  }
 };
 
 const context = {
@@ -51,6 +62,19 @@ server.applyMiddleware({ app });
 
 const port = 4000;
 
-app.listen({ port }, () =>
-  console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`),
-);
+app.listen({ port }, () => {
+  console.log(
+    `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`
+  );
+});
+
+process.on('exit', () => {
+  console.log('start exit');
+  Promise.all(db.close());
+  console.log('end exit');
+});
+
+process.on('SIGINT', () => {
+  console.log('caught interrupted');
+  process.exit(0);
+});
