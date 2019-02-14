@@ -2,12 +2,14 @@ const { Pool } = require('pg');
 
 const pool = new Pool();
 
-exports.query = async (sql, cb) => {
+exports.query = async sql => {
+  const client = await pool.connect();
   try {
-    const results = await pool.query(sql);
-    return cb(results);
+    return await client.query(sql);
   } catch (err) {
     console.error(err);
+  } finally {
+    client.release();
   }
 };
 
