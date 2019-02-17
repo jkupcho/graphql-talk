@@ -2,7 +2,7 @@ const db = require('../db');
 
 exports.findAll = async () => {
   try {
-    const results = await db.query('SELECT * FROM graphql.customer');
+    const results = await db.query('SELECT * FROM graphql.customers');
     return results.rows.map(
       ({
         id,
