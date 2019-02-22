@@ -1,20 +1,19 @@
-const { Pool } = require('pg');
+const knex = require('knex')({
+  client: 'pg',
+  connection: {
+    host: process.env.PGHOST,
+    user: process.env.PGUSER,
+    password: process.env.PGPASSWORD,
+    database: process.env.PGDATABASE
+  },
+  searchPath: ['graphql'],
+  pool: { min: 0, max: 25 }
+});
 
-const pool = new Pool();
-
-exports.query = async sql => {
-  const client = await pool.connect();
-  try {
-    return await client.query(sql);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    client.release();
-  }
-};
+exports.knex = knex;
 
 exports.close = () => {
   console.log('closing pool');
-  pool.end();
+  knex.destroy().timeout(5000, 'knex pool did not close properly.');
   console.log('closed pool');
 };

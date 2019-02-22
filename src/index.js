@@ -111,7 +111,7 @@ app.listen({ port }, () => {
 
 process.on('exit', () => {
   console.log('start exit');
-  Promise.all(db.close());
+  db.close();
   console.log('end exit');
 });
 
