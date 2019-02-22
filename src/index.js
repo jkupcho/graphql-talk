@@ -1,6 +1,10 @@
 const express = require('express');
 const { ApolloServer, gql, ApolloError } = require('apollo-server-express');
-const customerRepository = require('./repositories/customerRepository');
+const {
+  customerRepository,
+  orderRepository,
+  productRepository
+} = require('./repositories');
 const db = require('./db');
 
 // Construct a schema, using GraphQL schema language
@@ -12,6 +16,7 @@ const typeDefs = gql`
     email: String
     phone: String
     address: Address
+    orders: [Order]
   }
 
   type Address {
@@ -19,6 +24,27 @@ const typeDefs = gql`
     city: String
     state: String
     zipCode: String
+  }
+
+  type Order {
+    id: Int
+    customer: Customer
+    paymentType: String
+    ordered: String
+    shipped: String
+    lineItems: [LineItem]
+  }
+
+  type LineItem {
+    product: Product
+    quantity: Int
+  }
+
+  type Product {
+    name: String
+    company: String
+    retailPrice: Float
+    sku: String
   }
 
   type Query {
@@ -41,18 +67,33 @@ const resolvers = {
   },
   // Example List Resolver.
   Customer: {
-    address: (customer, args, context, info) => {
+    address: customer => {
       if (!customer.address) {
         // this allows an error object to show along with data.
         throw new AddressNotFound(`No address for customer: ${customer.id}`);
       }
       return customer.address;
+    },
+    orders: (customer, args, context, info) => {
+      return context.orderRepository.findByCustomerId(customer.id);
+    }
+  },
+  Order: {
+    lineItems: (order, args, context, info) => {
+      return context.orderRepository.findLineItemsByOrderId(order.id);
+    }
+  },
+  LineItem: {
+    product: (lineItem, args, context, info) => {
+      return context.productRepository.findById(lineItem.productId);
     }
   }
 };
 
 const context = {
-  customerRepository
+  customerRepository,
+  orderRepository,
+  productRepository
 };
 
 const server = new ApolloServer({ typeDefs, resolvers, context });
