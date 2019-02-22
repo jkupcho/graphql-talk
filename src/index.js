@@ -74,17 +74,17 @@ const resolvers = {
       }
       return customer.address;
     },
-    orders: (customer, args, context, info) => {
+    orders: customer => {
       return context.orderRepository.findByCustomerId(customer.id);
     }
   },
   Order: {
-    lineItems: (order, args, context, info) => {
+    lineItems: order => {
       return context.orderRepository.findLineItemsByOrderId(order.id);
     }
   },
   LineItem: {
-    product: (lineItem, args, context, info) => {
+    product: lineItem => {
       return context.productRepository.findById(lineItem.productId);
     }
   }
