@@ -1,20 +1,19 @@
-const { knex, query } = require('../db');
+const { knex } = require('../db');
+const DataLoader = require('dataloader');
 
-exports.findById = async id => {
-  try {
-    return knex
-      .select({
-        id: 'id',
-        name: 'product_name',
-        company: 'company_name',
-        retailPrice: 'retail_price',
-        sku: 'sku'
-      })
-      .from('products')
-      .where('id', '=', id)
-      .first()
-      .then(product => product);
-  } catch (err) {
-    console.error(err);
-  }
-};
+exports.findById = new DataLoader(ids => {
+  return knex
+    .table('products')
+    .whereIn('id', ids)
+    .select({
+      id: 'id',
+      name: 'product_name',
+      company: 'company_name',
+      retailPrice: 'retail_price',
+      sku: 'sku'
+    })
+    .then(rows => ids.map(id => {
+      return rows.find(x => x.id === +id);
+    }));
+  });
+

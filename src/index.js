@@ -67,36 +67,39 @@ const resolvers = {
   },
   // Example List Resolver.
   Customer: {
-    address: customer => {
+    address: (customer, args, context, info) => {
       if (!customer.address) {
         // this allows an error object to show along with data.
         throw new AddressNotFound(`No address for customer: ${customer.id}`);
       }
       return customer.address;
     },
-    orders: customer => {
+    orders: (customer, args, context, info) => {
       return context.orderRepository.findByCustomerId(customer.id);
     }
   },
   Order: {
-    lineItems: order => {
+    lineItems: (order, args, context, info) => {
       return context.orderRepository.findLineItemsByOrderId(order.id);
     }
   },
   LineItem: {
-    product: lineItem => {
-      return context.productRepository.findById(lineItem.productId);
+    product: (lineItem, args, context, info) => {
+      return context.productRepository.findById.load(lineItem.productId);
     }
   }
 };
 
-const context = {
-  customerRepository,
-  orderRepository,
-  productRepository
-};
 
-const server = new ApolloServer({ typeDefs, resolvers, context });
+const server = new ApolloServer({ 
+  typeDefs, 
+  resolvers, 
+  context: {
+    customerRepository,
+    orderRepository,
+    productRepository
+  } 
+});
 
 const app = express();
 server.applyMiddleware({ app });
