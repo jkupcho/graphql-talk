@@ -1,14 +1,17 @@
-const express = require('express');
-const { ApolloServer, gql, ApolloError } = require('apollo-server-express');
+const express = require("express");
+const { ApolloServer, gql, ApolloError } = require("apollo-server-express");
 const {
   customerRepository,
   orderRepository,
   productRepository
-} = require('./repositories');
-const db = require('./db');
+} = require("./repositories");
+const db = require("./db");
+const { DateTime } = require("./scalars");
 
 // Construct a schema, using GraphQL schema language
 const typeDefs = gql`
+  scalar DateTime
+
   type Customer {
     id: Int
     firstName: String
@@ -30,8 +33,8 @@ const typeDefs = gql`
     id: Int
     customer: Customer
     paymentType: String
-    ordered: String
-    shipped: String
+    ordered: DateTime
+    shipped: DateTime
     lineItems: [LineItem]
   }
 
@@ -60,6 +63,7 @@ class AddressNotFound extends ApolloError {
 
 // Provide resolver functions for your schema fields
 const resolvers = {
+  DateTime,
   Query: {
     customers: (parent, args, context, info) => {
       return context.customerRepository.findAll();
@@ -90,15 +94,14 @@ const resolvers = {
   }
 };
 
-
-const server = new ApolloServer({ 
-  typeDefs, 
-  resolvers, 
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
   context: {
     customerRepository,
     orderRepository,
     productRepository
-  } 
+  }
 });
 
 const app = express();
@@ -112,13 +115,13 @@ app.listen({ port }, () => {
   );
 });
 
-process.on('exit', () => {
-  console.log('start exit');
+process.on("exit", () => {
+  console.log("start exit");
   db.close();
-  console.log('end exit');
+  console.log("end exit");
 });
 
-process.on('SIGINT', () => {
-  console.log('caught interrupted');
+process.on("SIGINT", () => {
+  console.log("caught interrupted");
   process.exit(0);
 });
