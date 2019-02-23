@@ -1,3 +1,4 @@
+const compression = require('compression');
 const express = require('express');
 const { ApolloServer, gql, ApolloError } = require('apollo-server-express');
 const {
@@ -99,6 +100,8 @@ const context = {
 const server = new ApolloServer({ typeDefs, resolvers, context });
 
 const app = express();
+app.use(compression());
+
 server.applyMiddleware({ app });
 
 const port = 4000;
