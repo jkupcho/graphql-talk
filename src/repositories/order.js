@@ -1,17 +1,19 @@
 const { knex } = require("../db");
 const DataLoader = require("dataloader");
 
+const orderAliases = {
+  id: "id",
+  customerId: "customer_id",
+  paymentType: "payment_type",
+  ordered: "ordered_dtm",
+  shipped: "shipped_dtm"
+};
+
 exports.findOrdersByCustomerId = new DataLoader(ids => {
   return knex
     .table("customer_orders")
     .whereIn("customer_id", ids)
-    .select({
-      id: "id",
-      customerId: "customer_id",
-      paymentType: "payment_type",
-      ordered: "ordered_dtm",
-      shipped: "shipped_dtm"
-    })
+    .select(orderAliases)
     .then(rows => ids.map(id => rows.filter(x => +x.customerId === +id)));
 });
 

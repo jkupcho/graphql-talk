@@ -52,6 +52,7 @@ const typeDefs = gql`
 
   type Query {
     customers: [Customer]
+    customerOrders(customerId: Int!): [Order]
   }
 `;
 
@@ -67,6 +68,11 @@ const resolvers = {
   Query: {
     customers: (parent, args, context, info) => {
       return context.customerRepository.findAll();
+    },
+    customerOrders: (parent, args, context, info) => {
+      return context.orderRepository.findOrdersByCustomerId.load(
+        args.customerId
+      );
     }
   },
   // Example List Resolver.
@@ -85,6 +91,9 @@ const resolvers = {
   Order: {
     lineItems: (order, args, context, info) => {
       return context.orderRepository.findLineItemsByOrderId.load(order.id);
+    },
+    customer: (order, args, context) => {
+      return context.customerRepository.findById.load(order.customerId);
     }
   },
   LineItem: {
