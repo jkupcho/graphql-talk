@@ -12,8 +12,6 @@ exports.findById = new DataLoader(ids => {
       retailPrice: 'retail_price',
       sku: 'sku'
     })
-    .then(rows => ids.map(id => {
-      return rows.find(x => x.id === +id);
-    }));
+    .then(rows => ids.map(id => rows.find(x => x.id === +id)));
   });
 
