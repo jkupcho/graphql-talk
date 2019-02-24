@@ -90,15 +90,14 @@ const resolvers = {
   }
 };
 
-
-const server = new ApolloServer({ 
-  typeDefs, 
-  resolvers, 
-  context: {
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: ({ req }) => ({
     customerRepository,
-    orderRepository,
-    productRepository
-  } 
+    orderRepository: orderRepository.createLoaders(),
+    productRepository: productRepository.createLoaders()
+  })
 });
 
 const app = express();
