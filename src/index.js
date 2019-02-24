@@ -95,6 +95,7 @@ const server = new ApolloServer({
   resolvers,
   context: ({ req }) => ({
     customerRepository,
+    // per request dataloader
     orderRepository: orderRepository.createLoaders(),
     productRepository: productRepository.createLoaders()
   })
