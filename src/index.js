@@ -1,12 +1,12 @@
-const express = require("express");
-const { ApolloServer, gql, ApolloError } = require("apollo-server-express");
+const express = require('express');
+const { ApolloServer, gql, ApolloError } = require('apollo-server-express');
 const {
   customerRepository,
   orderRepository,
   productRepository
-} = require("./repositories");
-const db = require("./db");
-const { DateTime } = require("./scalars");
+} = require('./repositories');
+const db = require('./db');
+const { DateTime } = require('./scalars');
 
 // Construct a schema, using GraphQL schema language
 const typeDefs = gql`
@@ -106,11 +106,12 @@ const resolvers = {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: {
+  context: ({ req }) => ({
     customerRepository,
-    orderRepository,
-    productRepository
-  }
+    // per request dataloader
+    orderRepository: orderRepository.createLoaders(),
+    productRepository: productRepository.createLoaders()
+  })
 });
 
 const app = express();
@@ -124,13 +125,13 @@ app.listen({ port }, () => {
   );
 });
 
-process.on("exit", () => {
-  console.log("start exit");
+process.on('exit', () => {
+  console.log('start exit');
   db.close();
-  console.log("end exit");
+  console.log('end exit');
 });
 
-process.on("SIGINT", () => {
-  console.log("caught interrupted");
+process.on('SIGINT', () => {
+  console.log('caught interrupted');
   process.exit(0);
 });
