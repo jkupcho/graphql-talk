@@ -1,8 +1,8 @@
 const { knex } = require('../db');
 const DataLoader = require('dataloader');
 
-exports.createLoaders = () => ({
-  findOrdersByCustomerId: new DataLoader(ids => {
+exports.createLoaders = () => {
+  const ordersByCustomerIdLoader = new DataLoader(ids => {
     return knex
       .table('customer_orders')
       .whereIn('customer_id', ids)
@@ -21,8 +21,8 @@ exports.createLoaders = () => ({
           shipped: customer.shipped.toISOString()
         }));
       });
-  }),
-  findLineItemsByOrderId: new DataLoader(ids => {
+  });
+  const lineItemsByOrderIdLoader = new DataLoader(ids => {
     return knex
       .table('order_line_items')
       .whereIn('order_id', ids)
@@ -32,5 +32,10 @@ exports.createLoaders = () => ({
         quantity: 'quantity'
       })
       .then(rows => ids.map(id => rows.filter(x => +x.orderId === +id)));
-  })
-});
+  });
+
+  return {
+    findOrdersByCustomerId: (id) => ordersByCustomerIdLoader.load(id),
+    findLineItemsByOrderId: (id) => lineItemsByOrderIdLoader.load(id)
+  }
+};

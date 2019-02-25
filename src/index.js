@@ -75,12 +75,12 @@ const resolvers = {
       return customer.address;
     },
     orders: (customer, args, context, info) => {
-      return context.orderRepository.findOrdersByCustomerId.load(customer.id);
+      return context.orderRepository.findOrdersByCustomerId(customer.id);
     }
   },
   Order: {
     lineItems: (order, args, context, info) => {
-      return context.orderRepository.findLineItemsByOrderId.load(order.id);
+      return context.orderRepository.findLineItemsByOrderId(order.id);
     }
   },
   LineItem: {
