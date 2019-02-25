@@ -38,6 +38,18 @@ const typeDefs = gql`
     lineItems: [LineItem]
   }
 
+  type CustomerPage {
+    customers: [Customer]
+    pageInfo: PageInfo
+  }
+
+  type PageInfo {
+    limit: Int!
+    page: Int!
+    hasNext: Boolean!
+    numPages: Int!
+  }
+
   type LineItem {
     product: Product
     quantity: Int
@@ -51,8 +63,8 @@ const typeDefs = gql`
   }
 
   type Query {
-    customers: [Customer]
-    customerOrders(customerId: Int!): [Order]
+    getCustomers(limit: Int = 25, page: Int = 0): CustomerPage
+    getCustomerOrders(customerId: Int!): [Order]
   }
 `;
 
@@ -66,10 +78,11 @@ class AddressNotFound extends ApolloError {
 const resolvers = {
   DateTime,
   Query: {
-    customers: (parent, args, context, info) => {
-      return context.customerRepository.findAll();
+    getCustomers: (parent, args, context, info) => {
+      const { limit, page } = args;
+      return context.customerRepository.findAll(limit, page);
     },
-    customerOrders: (parent, args, context, info) => {
+    getCustomerOrders: (parent, args, context, info) => {
       return context.orderRepository.findOrdersByCustomerId.load(
         args.customerId
       );
