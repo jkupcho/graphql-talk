@@ -1,12 +1,12 @@
-const express = require('express');
-const { ApolloServer, gql, ApolloError } = require('apollo-server-express');
+const express = require("express");
+const { ApolloServer, gql, ApolloError } = require("apollo-server-express");
 const {
   customerRepository,
   orderRepository,
   productRepository
-} = require('./repositories');
-const db = require('./db');
-const { DateTime } = require('./scalars');
+} = require("./repositories");
+const db = require("./db");
+const { DateTime } = require("./scalars");
 
 // Construct a schema, using GraphQL schema language
 const typeDefs = gql`
@@ -79,17 +79,17 @@ const resolvers = {
       return customer.address;
     },
     orders: (customer, args, context, info) => {
-      return context.orderRepository.findOrdersByCustomerId.load(customer.id);
+      return context.orderRepository.findOrdersByCustomerId(customer.id);
     }
   },
   Order: {
     lineItems: (order, args, context, info) => {
-      return context.orderRepository.findLineItemsByOrderId.load(order.id);
+      return context.orderRepository.findLineItemsByOrderId(order.id);
     }
   },
   LineItem: {
     product: (lineItem, args, context, info) => {
-      return context.productRepository.findById.load(lineItem.productId);
+      return context.productRepository.findById(lineItem.productId);
     }
   }
 };
@@ -116,13 +116,13 @@ app.listen({ port }, () => {
   );
 });
 
-process.on('exit', () => {
-  console.log('start exit');
+process.on("exit", () => {
+  console.log("start exit");
   db.close();
-  console.log('end exit');
+  console.log("end exit");
 });
 
-process.on('SIGINT', () => {
-  console.log('caught interrupted');
+process.on("SIGINT", () => {
+  console.log("caught interrupted");
   process.exit(0);
 });
