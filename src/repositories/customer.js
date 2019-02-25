@@ -39,10 +39,11 @@ const customerMapper = ({
 
 const findAll = async (limit, page) => {
   try {
+    const offset = (page > 0 ? page - 1 : 0) * limit;
     const customers = await knex
       .table("customers")
       .limit(limit)
-      .offset(page * limit)
+      .offset(offset)
       .select(customerAliases)
       .orderBy("last_name")
       .map(customerMapper);
@@ -53,11 +54,12 @@ const findAll = async (limit, page) => {
       .first();
 
     const numPages = Math.ceil(count / limit);
-    const hasNext = (page + 1) * limit < count;
+    const hasNext = page * limit < count;
+    const newPage = page > 0 ? page : 1;
 
     const pageInfo = {
       limit,
-      page,
+      page: newPage,
       hasNext,
       numPages
     };
