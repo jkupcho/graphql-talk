@@ -1,18 +1,21 @@
-const { knex } = require('../db');
-const DataLoader = require('dataloader');
+const { knex } = require("../db");
+const DataLoader = require("dataloader");
 
-exports.createLoaders = () => ({
-  findById: new DataLoader(ids => {
+exports.createLoaders = () => {
+  const findByIdLoader = new DataLoader(ids => {
     return knex
-      .table('products')
-      .whereIn('id', ids)
+      .table("products")
+      .whereIn("id", ids)
       .select({
-        id: 'id',
-        name: 'product_name',
-        company: 'company_name',
-        retailPrice: 'retail_price',
-        sku: 'sku'
+        id: "id",
+        name: "product_name",
+        company: "company_name",
+        retailPrice: "retail_price",
+        sku: "sku"
       })
       .then(rows => ids.map(id => rows.find(x => x.id === +id)));
-  })
-});
+  });
+  return {
+    findById: id => findByIdLoader.load(id)
+  };
+};
