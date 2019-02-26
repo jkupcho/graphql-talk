@@ -1,14 +1,17 @@
-const express = require('express');
-const { ApolloServer, gql, ApolloError } = require('apollo-server-express');
+const express = require("express");
+const { ApolloServer, gql, ApolloError } = require("apollo-server-express");
 const {
   customerRepository,
   orderRepository,
   productRepository
-} = require('./repositories');
-const db = require('./db');
+} = require("./repositories");
+const db = require("./db");
+const { DateTime } = require("./scalars");
 
 // Construct a schema, using GraphQL schema language
 const typeDefs = gql`
+  scalar DateTime
+
   type Customer {
     id: Int
     firstName: String
@@ -30,9 +33,21 @@ const typeDefs = gql`
     id: Int
     customer: Customer
     paymentType: String
-    ordered: String
-    shipped: String
+    ordered: DateTime
+    shipped: DateTime
     lineItems: [LineItem]
+  }
+
+  type CustomerPage {
+    customers: [Customer]
+    pageInfo: PageInfo
+  }
+
+  type PageInfo {
+    limit: Int!
+    page: Int!
+    hasNext: Boolean!
+    numPages: Int!
   }
 
   type LineItem {
@@ -48,7 +63,8 @@ const typeDefs = gql`
   }
 
   type Query {
-    customers: [Customer]
+    getCustomers(limit: Int = 25, page: Int = 0): CustomerPage
+    getCustomerOrders(customerId: Int!): [Order]
   }
 `;
 
@@ -60,43 +76,51 @@ class AddressNotFound extends ApolloError {
 
 // Provide resolver functions for your schema fields
 const resolvers = {
+  DateTime,
   Query: {
-    customers: (parent, args, context, info) => {
-      return context.customerRepository.findAll();
+    getCustomers: (parent, args, context, info) => {
+      const { limit, page } = args;
+      return context.customerRepository.findAll(limit, page);
+    },
+    getCustomerOrders: (parent, args, context, info) => {
+      return context.orderRepository.findOrdersByCustomerId(args.customerId);
     }
   },
   // Example List Resolver.
   Customer: {
-    address: customer => {
+    address: (customer, args, context, info) => {
       if (!customer.address) {
         // this allows an error object to show along with data.
         throw new AddressNotFound(`No address for customer: ${customer.id}`);
       }
       return customer.address;
     },
-    orders: customer => {
-      return context.orderRepository.findByCustomerId(customer.id);
+    orders: (customer, args, context, info) => {
+      return context.orderRepository.findOrdersByCustomerId(customer.id);
     }
   },
   Order: {
-    lineItems: order => {
+    lineItems: (order, args, context, info) => {
       return context.orderRepository.findLineItemsByOrderId(order.id);
     }
   },
   LineItem: {
-    product: lineItem => {
+    product: (lineItem, args, context, info) => {
       return context.productRepository.findById(lineItem.productId);
     }
   }
 };
 
-const context = {
-  customerRepository,
-  orderRepository,
-  productRepository
-};
-
-const server = new ApolloServer({ typeDefs, resolvers, context });
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context: ({ req }) => ({
+    // per request dataloader
+    customerRepository: customerRepository.createLoaders(),
+    orderRepository: orderRepository.createLoaders(),
+    productRepository: productRepository.createLoaders()
+  })
+});
 
 const app = express();
 
@@ -110,13 +134,13 @@ app.listen({ port }, () => {
   );
 });
 
-process.on('exit', () => {
-  console.log('start exit');
+process.on("exit", () => {
+  console.log("start exit");
   db.close();
-  console.log('end exit');
+  console.log("end exit");
 });
 
-process.on('SIGINT', () => {
-  console.log('caught interrupted');
+process.on("SIGINT", () => {
+  console.log("caught interrupted");
   process.exit(0);
 });

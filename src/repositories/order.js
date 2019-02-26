@@ -1,39 +1,41 @@
-const { knex } = require('../db');
+const { knex } = require("../db");
+const DataLoader = require("dataloader");
 
-exports.findByCustomerId = async customerId => {
-  try {
-    return await knex
+exports.createLoaders = () => {
+  const ordersByCustomerIdLoader = new DataLoader(ids => {
+    return knex
+      .table("customer_orders")
+      .whereIn("customer_id", ids)
       .select({
-        id: 'id',
-        customerId: 'customer_id',
-        paymentType: 'payment_type',
-        ordered: 'ordered_dtm',
-        shipped: 'shipped_dtm'
+        id: "id",
+        customerId: "customer_id",
+        paymentType: "payment_type",
+        ordered: "ordered_dtm",
+        shipped: "shipped_dtm"
       })
-      .from('customer_orders')
-      .where('customer_id', '=', customerId)
-      .map(customer => ({
-        ...customer,
-        ordered: new Date(customer.ordered).toISOString(),
-        shipped: new Date(customer.shipped).toISOString()
-      }));
-  } catch (err) {
-    console.error(err);
-  }
-};
+      .then(rows => ids.map(id => rows.filter(x => +x.customerId === +id)))
+      .map(customers => {
+        return customers.map(customer => ({
+          ...customer,
+          ordered: customer.ordered.toISOString(),
+          shipped: customer.shipped.toISOString()
+        }));
+      });
+  });
+  const lineItemsByOrderIdLoader = new DataLoader(ids => {
+    return knex
+      .table("order_line_items")
+      .whereIn("order_id", ids)
+      .select({
+        orderId: "order_id",
+        productId: "product_id",
+        quantity: "quantity"
+      })
+      .then(rows => ids.map(id => rows.filter(x => +x.orderId === +id)));
+  });
 
-exports.findLineItemsByOrderId = async orderId => {
-  try {
-    return await knex
-      .select({
-        orderId: 'order_id',
-        productId: 'product_id',
-        quantity: 'quantity'
-      })
-      .from('order_line_items')
-      .where('order_id', '=', orderId)
-      .map(orderLineItem => orderLineItem);
-  } catch (err) {
-    console.error(err);
-  }
+  return {
+    findOrdersByCustomerId: id => ordersByCustomerIdLoader.load(id),
+    findLineItemsByOrderId: id => lineItemsByOrderIdLoader.load(id)
+  };
 };
