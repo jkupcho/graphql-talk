@@ -63,7 +63,7 @@ const typeDefs = gql`
   }
 
   type Query {
-    getCustomers(limit: Int = 25, page: Int = 1): CustomerPage
+    getCustomers(limit: Int = 25, page: Int = 0): CustomerPage
     getCustomerOrders(customerId: Int!): [Order]
   }
 `;
