@@ -1,0 +1,15 @@
+version: "3"
+services:
+  ui:
+    build:
+      context: ./ui
+    ports:
+      - 80:80
+  api:
+    build:
+      context: ./api
+    environment:
+      PGHOST: database
+  database:
+    build:
+      context: ./database
