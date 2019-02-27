@@ -8,6 +8,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import { withStyles } from "@material-ui/core/styles";
+import { withRouter } from "react-router-dom";
 
 const styles = theme => ({
   root: {
@@ -23,6 +24,11 @@ const styles = theme => ({
   row: {
     "&:nth-of-type(odd)": {
       backgroundColor: theme.palette.background.default
+    },
+    "&:hover": {
+      backgroundColor: "#ddd",
+      textDecoration: "underline",
+      cursor: "pointer"
     }
   }
 });
@@ -50,17 +56,59 @@ export const CustomerFooter = ({
   </TableFooter>
 );
 
-export const CustomerBody = withStyles(styles)(({ classes, customers }) => (
-  <TableBody>
-    {customers.map(({ id, firstName, lastName, orders }) => (
-      <TableRow key={id} className={classes.row}>
+const CustomerRow = withRouter(
+  ({
+    customer: { id, firstName, lastName, orders },
+    classes,
+    getCustomer,
+    history
+  }) => {
+    let timeoutVal = null;
+
+    // Prefetch after 600ms.
+    const handleMouseOver = () => {
+      timeoutVal = setTimeout(getCustomer.bind(this, id), 600);
+    };
+
+    const cancelTimeout = () => {
+      clearTimeout(timeoutVal);
+    };
+
+    const navigate = () => {
+      history.push(`/customer/${id}`);
+    };
+
+    return (
+      <TableRow
+        className={classes.row}
+        onMouseOver={handleMouseOver}
+        onMouseOut={cancelTimeout}
+        onClick={navigate}
+      >
         <TableCell scope="row">{firstName}</TableCell>
         <TableCell align="right">{lastName}</TableCell>
         <TableCell align="right">{orders.length}</TableCell>
       </TableRow>
-    ))}
-  </TableBody>
-));
+    );
+  }
+);
+
+export const CustomerBody = withStyles(styles)(
+  ({ classes, customers, getCustomer }) => {
+    return (
+      <TableBody>
+        {customers.map(customer => (
+          <CustomerRow
+            key={customer.id}
+            classes={classes}
+            customer={customer}
+            getCustomer={getCustomer}
+          />
+        ))}
+      </TableBody>
+    );
+  }
+);
 
 export const CustomerHeader = () => (
   <TableHead>

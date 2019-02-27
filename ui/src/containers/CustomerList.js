@@ -1,48 +1,43 @@
 import React, { useState } from "react";
 import { Query } from "react-apollo";
-import { gql } from "apollo-boost";
+import { withRouter } from "react-router-dom";
+import qs from "query-string";
 
+import { GET_CUSTOMER, GET_CUSTOMERS } from "../graphql/customer";
 import {
   CustomerBody,
   CustomerFooter,
   CustomerHeader,
   CustomerTable
-} from "../components/Customer";
+} from "../components/CustomerTable";
 
-const GET_CUSTOMERS = gql`
-  query Customers($limit: Int, $page: Int) {
-    getCustomers(limit: $limit, page: $page) {
-      pageInfo {
-        limit
-        page
-        hasNext
-        numPages
-      }
-      customers {
-        id
-        firstName
-        lastName
-        orders {
-          id
-        }
-      }
-    }
-  }
-`;
+export default withRouter(({ history, location }) => {
+  const parsed = qs.parse(location.search);
 
-export default () => {
-  const [limit, setLimit] = useState(5);
-  const [page, setPage] = useState(0);
+  const [limit, setLimit] = useState(parsed.limit ? +parsed.limit : 5);
+  const [page, setPage] = useState(parsed.page ? +parsed.page : 0);
 
-  const handleChangePage = (evt, page) => setPage(page);
+  const handleChangePage = (evt, page) => {
+    history.push({
+      pathname: "/",
+      search: qs.stringify({ page, limit })
+    });
+    setPage(page);
+  };
 
   const handleChangeRowsPerPage = evt => {
+    const newLimit = +evt.target.value;
+
+    history.push({
+      pathname: "/",
+      search: qs.stringify({ limit: newLimit })
+    });
     setPage(0);
-    setLimit(+evt.target.value);
+    setLimit(newLimit);
   };
 
   return (
-    <Query query={GET_CUSTOMERS} variables={{ limit, page }}>
+    <Query query={GET_CUSTOMERS} variables={{ pageInput: { limit, page } }}>
       {({ loading, error, data, client }) => {
         if (loading) return null;
         if (error) return `Error!: ${error}`;
@@ -55,14 +50,24 @@ export default () => {
         if (page + 1 < pageInfo.numPages) {
           client.query({
             query: GET_CUSTOMERS,
-            variables: { page: page + 1, limit }
+            variables: { pageInput: { page: page + 1, limit } }
           });
         }
+
+        const handleGetCustomer = id => {
+          client.query({
+            query: GET_CUSTOMER,
+            variables: { id, withOrders: true }
+          });
+        };
 
         return (
           <CustomerTable>
             <CustomerHeader />
-            <CustomerBody customers={customers} />
+            <CustomerBody
+              customers={customers}
+              getCustomer={handleGetCustomer}
+            />
             <CustomerFooter
               pageInfo={pageInfo}
               handleChangePage={handleChangePage}
@@ -73,4 +78,4 @@ export default () => {
       }}
     </Query>
   );
-};
+});

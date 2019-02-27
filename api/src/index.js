@@ -12,6 +12,11 @@ const { DateTime } = require("./scalars");
 const typeDefs = gql`
   scalar DateTime
 
+  input PageInput {
+    limit: Int!
+    page: Int!
+  }
+
   type Customer {
     id: Int
     firstName: String
@@ -63,8 +68,9 @@ const typeDefs = gql`
   }
 
   type Query {
-    getCustomers(limit: Int = 25, page: Int = 0): CustomerPage
+    getCustomers(pageInput: PageInput!): CustomerPage
     getCustomerOrders(customerId: Int!): [Order]
+    getCustomer(id: Int!): Customer
   }
 `;
 
@@ -79,11 +85,16 @@ const resolvers = {
   DateTime,
   Query: {
     getCustomers: (parent, args, context, info) => {
-      const { limit, page } = args;
+      const {
+        pageInput: { limit, page }
+      } = args;
       return context.customerRepository.findAll(limit, page);
     },
     getCustomerOrders: (parent, args, context, info) => {
       return context.orderRepository.findOrdersByCustomerId(args.customerId);
+    },
+    getCustomer: (parent, { id }, context) => {
+      return context.customerRepository.findById(id);
     }
   },
   // Example List Resolver.
