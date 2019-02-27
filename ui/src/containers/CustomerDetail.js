@@ -6,12 +6,12 @@ import { GET_CUSTOMER } from "../graphql/customer";
 export default ({ match }) => {
   return (
     <Query query={GET_CUSTOMER} variables={{ id: +match.params.customerId }}>
-      {({ loading, error, data, client }) => {
+      {({ loading, error, data }) => {
         if (loading) return null;
         if (error) return `Error!: ${error}`;
 
         const {
-          getCustomer: { firstName, lastName, email }
+          customer: { firstName, lastName, email }
         } = data;
 
         return (

@@ -2,7 +2,7 @@ import { gql } from "apollo-boost";
 
 export const GET_CUSTOMERS = gql`
   query Customers($pageInput: PageInput!) {
-    getCustomers(pageInput: $pageInput) {
+    customers(pageInput: $pageInput) {
       pageInfo {
         limit
         page
@@ -58,7 +58,7 @@ export const GET_CUSTOMER = gql`
     $withOrders: Boolean! = false
     $withLineItems: Boolean! = false
   ) {
-    getCustomer(id: $id) {
+    customer(id: $id) {
       ...customerFragment
       orders @include(if: $withOrders) {
         ...orderFragment

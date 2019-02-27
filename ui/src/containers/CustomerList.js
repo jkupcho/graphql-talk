@@ -56,7 +56,7 @@ export default withRouter(({ history, location }) => {
         if (error) return `Error!: ${error}`;
 
         const {
-          getCustomers: { customers, pageInfo }
+          customers: { customers, pageInfo }
         } = data;
 
         // prefetch next page to avoid flashing the div.
