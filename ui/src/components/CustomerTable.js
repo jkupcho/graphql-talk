@@ -9,6 +9,7 @@ import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import { withStyles } from "@material-ui/core/styles";
 import { withRouter } from "react-router-dom";
+import { Typography } from "@material-ui/core";
 
 const styles = theme => ({
   root: {
@@ -17,6 +18,9 @@ const styles = theme => ({
     marginRight: "auto",
     marginTop: theme.spacing.unit * 3,
     overflowX: "auto"
+  },
+  headerPadding: {
+    padding: 25
   },
   table: {
     minWidth: 700
@@ -122,6 +126,9 @@ export const CustomerHeader = () => (
 
 export const CustomerTable = withStyles(styles)(({ children, classes }) => (
   <Paper className={classes.root}>
+    <Typography component="h2" variant="h2" className={classes.headerPadding}>
+      Customers
+    </Typography>
     <Table className={classes.table}>{children}</Table>
   </Paper>
 ));

@@ -32,17 +32,22 @@ const styles = theme => ({
   ordersRoot: {
     padding: 25
   },
+  row: {
+    "&:nth-of-type(odd)": {
+      backgroundColor: theme.palette.background.default
+    }
+  },
   tableRoot: {
     marginTop: 25
   }
 });
 
-const OrderRow = ({ order }) => {
+const OrderRow = ({ order, classes }) => {
   const totalPrice = order.lineItems
     .reduce((acc, item) => acc + item.product.retailPrice, 0)
     .toFixed(2);
   return (
-    <TableRow>
+    <TableRow className={classes.row}>
       <TableCell>{order.ordered}</TableCell>
       <TableCell>{order.shipped}</TableCell>
       <TableCell>{order.lineItems.length}</TableCell>
@@ -70,7 +75,7 @@ const Orders = ({ customer, classes }) => {
         </TableHead>
         <TableBody>
           {orders.map(order => (
-            <OrderRow key={order.id} order={order} />
+            <OrderRow key={order.id} order={order} classes={classes} />
           ))}
         </TableBody>
       </Table>
