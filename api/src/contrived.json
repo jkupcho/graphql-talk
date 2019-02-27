@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "total": 1.23,
+    "authorizationCode": "B1-2324442-OB"
+  },
+  {
+    "id": 2,
+    "total": 4.56,
+    "bankAuthCode": "NerdWallet-1234"
+  },
+  {
+    "id": 3,
+    "total": 7.89,
+    "chargeBack": true
+  }
+]

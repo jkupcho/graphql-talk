@@ -7,10 +7,46 @@ const {
 } = require("./repositories");
 const db = require("./db");
 const { DateTime } = require("./scalars");
+const contrived = require("./contrived.json");
 
 // Construct a schema, using GraphQL schema language
 const typeDefs = gql`
   scalar DateTime
+
+  enum PaymentType {
+    CREDIT
+    DEBIT
+    PAYPAL
+  }
+
+  interface Payment {
+    id: Int!
+    total: Float!
+    paymentType: PaymentType!
+  }
+
+  type Credit implements Payment {
+    id: Int!
+    total: Float!
+    paymentType: PaymentType!
+    authorizationCode: String!
+  }
+
+  type Debit implements Payment {
+    id: Int!
+    total: Float!
+    paymentType: PaymentType!
+    bankAuthCode: String!
+  }
+
+  type PayPal implements Payment {
+    id: Int!
+    total: Float!
+    paymentType: PaymentType!
+    chargeBack: Boolean!
+  }
+
+  union OrderPayment = Credit | Debit | PayPal
 
   input PageInput {
     limit: Int!
@@ -71,6 +107,7 @@ const typeDefs = gql`
     customers(pageInput: PageInput!): CustomerPage
     customerOrders(customerId: Int!): [Order]
     customer(id: Int!): Customer
+    orderPayments: [OrderPayment]
   }
 `;
 
@@ -95,7 +132,8 @@ const resolvers = {
     },
     customer: (parent, { id }, context) => {
       return context.customerRepository.findById(id);
-    }
+    },
+    orderPayments: () => contrived
   },
   // Example List Resolver.
   Customer: {
@@ -119,6 +157,29 @@ const resolvers = {
     product: (lineItem, args, context, info) => {
       return context.productRepository.findById(lineItem.productId);
     }
+  },
+  Payment: {
+    __resolveType(obj, context, info) {
+      return resolvePayment(obj, info);
+    }
+  },
+  OrderPayment: {
+    __resolveType(obj, context, info) {
+      return resolvePayment(obj, info);
+    }
+  }
+};
+
+const resolvePayment = (obj, info) => {
+  if (obj.authorizationCode) {
+    return "Credit";
+  }
+  if (obj.bankAuthCode) {
+    return "Debit";
+  }
+  if (obj.chargeBack) {
+    // this does the same thing, old way of doing it
+    return info.schema.getType("PayPal");
   }
 };
 
