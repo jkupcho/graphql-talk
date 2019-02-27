@@ -1,5 +1,6 @@
 FROM node:lts-alpine as generate_data
 COPY ./generate_data/package.json /app/package.json
+COPY ./generate_data/package-lock.json /app/package-lock.json
 WORKDIR /app
 RUN npm install
 COPY ./generate_data/index.js /app/index.js
