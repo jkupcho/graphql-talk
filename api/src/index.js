@@ -68,9 +68,9 @@ const typeDefs = gql`
   }
 
   type Query {
-    getCustomers(pageInput: PageInput!): CustomerPage
-    getCustomerOrders(customerId: Int!): [Order]
-    getCustomer(id: Int!): Customer
+    customers(pageInput: PageInput!): CustomerPage
+    customerOrders(customerId: Int!): [Order]
+    customer(id: Int!): Customer
   }
 `;
 
@@ -84,16 +84,16 @@ class AddressNotFound extends ApolloError {
 const resolvers = {
   DateTime,
   Query: {
-    getCustomers: (parent, args, context, info) => {
+    customers: (parent, args, context, info) => {
       const {
         pageInput: { limit, page }
       } = args;
       return context.customerRepository.findAll(limit, page);
     },
-    getCustomerOrders: (parent, args, context, info) => {
+    customerOrders: (parent, args, context, info) => {
       return context.orderRepository.findOrdersByCustomerId(args.customerId);
     },
-    getCustomer: (parent, { id }, context) => {
+    customer: (parent, { id }, context) => {
       return context.customerRepository.findById(id);
     }
   },
