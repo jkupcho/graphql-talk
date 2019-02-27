@@ -2,6 +2,7 @@
 FROM node:lts-alpine as builder
 
 COPY package.json /tmp/package.json
+COPY package-lock.json /tmp/package-lock.json
 WORKDIR /tmp
 
 RUN npm install
