@@ -4,36 +4,26 @@ const { gql } = require("apollo-server-express");
 exports.typeDefs = gql`
   scalar DateTime
 
-  enum PaymentType {
-    CREDIT
-    DEBIT
-    PAYPAL
-  }
-
   interface Payment {
     id: Int!
     total: Float!
-    paymentType: PaymentType!
   }
 
   type Credit implements Payment {
     id: Int!
     total: Float!
-    paymentType: PaymentType!
     authorizationCode: String!
   }
 
   type Debit implements Payment {
     id: Int!
     total: Float!
-    paymentType: PaymentType!
     bankAuthCode: String!
   }
 
   type PayPal implements Payment {
     id: Int!
     total: Float!
-    paymentType: PaymentType!
     chargeBack: Boolean!
   }
 
