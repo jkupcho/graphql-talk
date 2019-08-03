@@ -24,7 +24,7 @@ export default withRouter(({ history, location }) => {
 
     setLimit(parsedLimit);
     setPage(parsedPage);
-  });
+  }, [location.search]);
 
   // --- PAGE NAVIGATION HANDLING - Start
   // Replace the router history so if the user navigates backwards the

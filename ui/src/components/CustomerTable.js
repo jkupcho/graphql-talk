@@ -16,7 +16,7 @@ const styles = theme => ({
     width: "80%",
     marginLeft: "auto",
     marginRight: "auto",
-    marginTop: theme.spacing.unit * 3,
+    marginTop: theme.spacing(3),
     overflowX: "auto"
   },
   headerPadding: {

@@ -10,13 +10,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "apollo-server": "^2.4.0",
-    "apollo-server-express": "^2.4.0",
+    "apollo-server": "^2.8.1",
+    "apollo-server-express": "^2.8.1",
     "dataloader": "^1.4.0",
-    "lodash": "^4.17.13",
-    "dotenv": "^6.2.0",
-    "graphql": "^14.1.1",
-    "knex": "^0.16.3",
-    "pg": "^7.8.0"
+    "lodash": "^4.17.15",
+    "dotenv": "^8.0.00",
+    "graphql": "^14.4.2",
+    "knex": "^0.19.1",
+    "pg": "^7.12.0"
   }
 }

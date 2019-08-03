@@ -30,11 +30,16 @@ const styles = theme => ({
     marginTop: 3
   },
   ordersRoot: {
-    padding: 25
+    padding: 25,
+    marginRight: 15
   },
   row: {
     "&:nth-of-type(odd)": {
       backgroundColor: theme.palette.background.default
+    },
+    "&:hover": {
+      cursor: "pointer",
+      backgroundColor: "#efefef"
     }
   },
   tableRoot: {
@@ -42,22 +47,33 @@ const styles = theme => ({
   }
 });
 
-const OrderRow = ({ order, classes }) => {
+const OrderRow = ({ order, classes, onClick }) => {
   const totalPrice = order.lineItems
     .reduce((acc, item) => acc + item.product.retailPrice, 0)
     .toFixed(2);
+
+  const numItems = order.lineItems.reduce(
+    (acc, lineItem) => acc + lineItem.quantity,
+    0
+  );
+
   return (
-    <TableRow className={classes.row}>
+    <TableRow className={classes.row} onClick={onClick}>
+      <TableCell>{order.id}</TableCell>
       <TableCell>{order.ordered}</TableCell>
       <TableCell>{order.shipped}</TableCell>
-      <TableCell>{order.lineItems.length}</TableCell>
+      <TableCell>{numItems}</TableCell>
       <TableCell>{totalPrice}</TableCell>
     </TableRow>
   );
 };
 
-const Orders = ({ customer, classes }) => {
+const Orders = ({ customer, onClick, classes }) => {
   const { orders } = customer;
+
+  const handleClick = order => {
+    onClick(order);
+  };
 
   return (
     <Paper className={classes.ordersRoot}>
@@ -67,6 +83,7 @@ const Orders = ({ customer, classes }) => {
       <Table className={classes.tableRoot}>
         <TableHead>
           <TableRow>
+            <TableCell>Order ID</TableCell>
             <TableCell>Ordered</TableCell>
             <TableCell>Shipped</TableCell>
             <TableCell>Num. Items</TableCell>
@@ -74,9 +91,17 @@ const Orders = ({ customer, classes }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {orders.map(order => (
-            <OrderRow key={order.id} order={order} classes={classes} />
-          ))}
+          {orders.map(order => {
+            const orderOnClick = handleClick.bind(this, order);
+            return (
+              <OrderRow
+                key={order.id}
+                order={order}
+                classes={classes}
+                onClick={orderOnClick}
+              />
+            );
+          })}
         </TableBody>
       </Table>
     </Paper>
@@ -126,14 +151,18 @@ const SideBar = ({ customer, classes }) => {
   );
 };
 
-const CustomerProfile = ({ customer, classes }) => {
+const CustomerProfile = ({ customer, handleOrderClick, classes }) => {
   return (
-    <Grid container spacing={24} className={classes.root}>
+    <Grid container spacing={2} className={classes.root}>
       <Grid item sm={3}>
         <SideBar classes={classes} customer={customer} />
       </Grid>
       <Grid item sm={9}>
-        <Orders classes={classes} customer={customer} />
+        <Orders
+          classes={classes}
+          customer={customer}
+          onClick={handleOrderClick}
+        />
       </Grid>
     </Grid>
   );
