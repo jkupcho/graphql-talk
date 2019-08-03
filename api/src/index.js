@@ -1,5 +1,5 @@
 const express = require("express");
-const { ApolloServer, gql, ApolloError } = require("apollo-server-express");
+const { ApolloServer, ApolloError } = require("apollo-server-express");
 const {
   customerRepository,
   orderRepository,
@@ -50,6 +50,9 @@ const resolvers = {
   Order: {
     lineItems: (order, args, context, info) => {
       return context.orderRepository.findLineItemsByOrderId(order.id);
+    },
+    customer: (order, args, context) => {
+      return context.customerRepository.findById(order.customerId);
     }
   },
   LineItem: {
