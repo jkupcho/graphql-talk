@@ -1,14 +1,14 @@
-const express = require("express");
-const { ApolloServer, ApolloError } = require("apollo-server-express");
+const express = require('express');
+const { ApolloServer, ApolloError } = require('apollo-server-express');
 const {
   customerRepository,
   orderRepository,
   productRepository
-} = require("./repositories");
-const db = require("./db");
-const { DateTime } = require("./scalars");
-const { typeDefs } = require("./schema");
-const contrived = require("./contrived.json");
+} = require('./repositories');
+const db = require('./db');
+const { DateTime } = require('./scalars');
+const { typeDefs } = require('./schema');
+const contrived = require('./contrived.json');
 
 class AddressNotFound extends ApolloError {
   constructor(message) {
@@ -33,6 +33,11 @@ const resolvers = {
       return context.customerRepository.findById(id);
     },
     orderPayments: () => contrived
+  },
+  Mutation: {
+    PlaceOrder: async (_, { order }, { orderRepository }) => {
+      orderRepository.placeOrder(order);
+    }
   },
   // Example List Resolver.
   Customer: {
@@ -74,14 +79,14 @@ const resolvers = {
 
 const resolvePayment = (obj, info) => {
   if (obj.authorizationCode) {
-    return "Credit";
+    return 'Credit';
   }
   if (obj.bankAuthCode) {
-    return "Debit";
+    return 'Debit';
   }
   if (obj.chargeBack) {
     // this does the same thing, old way of doing it
-    return info.schema.getType("PayPal");
+    return info.schema.getType('PayPal');
   }
 };
 
@@ -108,13 +113,13 @@ app.listen({ port }, () => {
   );
 });
 
-process.on("exit", () => {
-  console.log("start exit");
+process.on('exit', () => {
+  console.log('start exit');
   db.close();
-  console.log("end exit");
+  console.log('end exit');
 });
 
-process.on("SIGINT", () => {
-  console.log("caught interrupted");
+process.on('SIGINT', () => {
+  console.log('caught interrupted');
   process.exit(0);
 });

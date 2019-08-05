@@ -1,4 +1,4 @@
-const { gql } = require("apollo-server-express");
+const { gql } = require('apollo-server-express');
 
 // Construct a schema, using GraphQL schema language
 exports.typeDefs = gql`
@@ -89,5 +89,20 @@ exports.typeDefs = gql`
     customerOrders(customerId: Int!): [Order]
     customer(id: Int!): Customer
     orderPayments: [OrderPayment]
+  }
+
+  input LineItemInput {
+    productId: Int!
+    quantity: Int!
+  }
+
+  input PlaceOrderInput {
+    customerId: Int
+    paymentType: String
+    lineItems: [LineItemInput]
+  }
+
+  type Mutation {
+    PlaceOrder(order: PlaceOrderInput!): Order
   }
 `;
