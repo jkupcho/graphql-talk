@@ -69,7 +69,6 @@ exports.createLoaders = () => {
       })
     );
 
-    // return await orderById(insertedOrderId);
     return { id: +insertedOrderId, customerId: +order.customerId };
   };
 
