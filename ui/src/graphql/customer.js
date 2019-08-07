@@ -54,7 +54,7 @@ export const GET_CUSTOMER = gql`
   }
 
   query Customer(
-    $id: Int!
+    $id: ID!
     $withOrders: Boolean! = false
     $withLineItems: Boolean! = false
   ) {

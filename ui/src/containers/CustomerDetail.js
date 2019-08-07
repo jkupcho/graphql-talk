@@ -9,7 +9,6 @@ export default ({ match }) => {
   const [orderDetail, setOrderDetail] = useState({ show: false, order: {} });
 
   const handleOrderClick = order => {
-    console.log("in handleOrderClick");
     setOrderDetail({ show: true, order });
   };
 
