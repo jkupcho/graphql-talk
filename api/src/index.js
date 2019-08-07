@@ -27,13 +27,13 @@ const resolvers = {
       return context.customerRepository.findAll(limit, page);
     },
     customerOrders: (parent, args, context, info) => {
-      return context.orderRepository.findOrdersByCustomerId(args.customerId);
+      return context.orderRepository.findOrdersByCustomerId(+args.customerId);
     },
     customer: (parent, args, context) => {
-      return context.customerRepository.findById(args.id);
+      return context.customerRepository.findById(+args.id);
     },
     order: async (parent, args, context) => {
-      const result = await context.orderRepository.orderById(args.id);
+      const result = await context.orderRepository.orderById(+args.id);
       return result[0];
     },
     orderPayments: () => contrived
