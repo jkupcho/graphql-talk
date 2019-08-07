@@ -1,28 +1,28 @@
-const { gql } = require('apollo-server-express');
+const { gql } = require("apollo-server-express");
 
 // Construct a schema, using GraphQL schema language
 exports.typeDefs = gql`
   scalar DateTime
 
   interface Payment {
-    id: Int!
+    id: ID!
     total: Float!
   }
 
   type Credit implements Payment {
-    id: Int!
+    id: ID!
     total: Float!
     authorizationCode: String!
   }
 
   type Debit implements Payment {
-    id: Int!
+    id: ID!
     total: Float!
     bankAuthCode: String!
   }
 
   type PayPal implements Payment {
-    id: Int!
+    id: ID!
     total: Float!
     chargeBack: Boolean!
   }
@@ -35,7 +35,7 @@ exports.typeDefs = gql`
   }
 
   type Customer {
-    id: Int
+    id: ID
     firstName: String
     lastName: String
     email: String
@@ -52,7 +52,7 @@ exports.typeDefs = gql`
   }
 
   type Order {
-    id: Int
+    id: ID
     customer: Customer
     paymentType: String
     ordered: DateTime
@@ -86,8 +86,9 @@ exports.typeDefs = gql`
 
   type Query {
     customers(pageInput: PageInput!): CustomerPage
-    customerOrders(customerId: Int!): [Order]
-    customer(id: Int!): Customer
+    customerOrders(customerId: ID!): [Order]
+    customer(id: ID!): Customer
+    order(id: ID!): Order
     orderPayments: [OrderPayment]
   }
 

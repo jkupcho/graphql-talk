@@ -29,8 +29,12 @@ const resolvers = {
     customerOrders: (parent, args, context, info) => {
       return context.orderRepository.findOrdersByCustomerId(args.customerId);
     },
-    customer: (parent, { id }, context) => {
-      return context.customerRepository.findById(id);
+    customer: (parent, args, context) => {
+      return context.customerRepository.findById(args.id);
+    },
+    order: async (parent, args, context) => {
+      const result = await context.orderRepository.orderById(args.id);
+      return result[0];
     },
     orderPayments: () => contrived
   },
@@ -58,6 +62,24 @@ const resolvers = {
     },
     customer: (order, args, context) => {
       return context.customerRepository.findById(order.customerId);
+    },
+    paymentType: async (order, args, context, info) => {
+      const { id } = order;
+      const result = await context.orderRepository.orderById(id);
+
+      return result[0].paymentType;
+    },
+    ordered: async (order, args, context, info) => {
+      const { id } = order;
+      const result = await context.orderRepository.orderById(id);
+
+      return result[0].ordered;
+    },
+    shipped: async (order, args, context, info) => {
+      const { id } = order;
+      const result = await context.orderRepository.orderById(id);
+
+      return result[0].shipped;
     }
   },
   LineItem: {

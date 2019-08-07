@@ -23,10 +23,10 @@ exports.createLoaders = () => {
       });
   });
 
-  const orderById = id => {
+  const orderByIdLoader = new DataLoader(ids => {
     return knex
       .table("customer_orders")
-      .where({ id: +id })
+      .whereIn("id", ids)
       .select({
         id: "id",
         customerId: "customer_id",
@@ -34,8 +34,8 @@ exports.createLoaders = () => {
         ordered: "ordered_dtm",
         shipped: "shipped_dtm"
       })
-      .first();
-  };
+      .then(rows => ids.map(id => rows.filter(x => +x.id === +id)));
+  });
 
   const lineItemsByOrderIdLoader = new DataLoader(ids => {
     return knex
@@ -69,13 +69,14 @@ exports.createLoaders = () => {
       })
     );
 
-    return await orderById(insertedOrderId);
+    // return await orderById(insertedOrderId);
+    return { id: +insertedOrderId, customerId: +order.customerId };
   };
 
   return {
     findOrdersByCustomerId: id => ordersByCustomerIdLoader.load(id),
     findLineItemsByOrderId: id => lineItemsByOrderIdLoader.load(id),
     placeOrder,
-    orderById
+    orderById: id => orderByIdLoader.load(id)
   };
 };
