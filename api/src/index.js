@@ -32,9 +32,8 @@ const resolvers = {
     customer: (parent, args, context) => {
       return context.customerRepository.findById(+args.id);
     },
-    order: async (parent, args, context) => {
-      const result = await context.orderRepository.orderById(+args.id);
-      return result[0];
+    order: (parent, args, context) => {
+      return context.orderRepository.orderById(+args.id);
     },
     orderPayments: () => contrived
   },
@@ -60,26 +59,28 @@ const resolvers = {
     lineItems: (order, args, context, info) => {
       return context.orderRepository.findLineItemsByOrderId(order.id);
     },
-    customer: (order, args, context) => {
-      return context.customerRepository.findById(order.customerId);
+    customer: async (order, args, context) => {
+      const { customerId } = await context.orderRepository.orderById(order.id);
+      // dataloader returns an array
+      return await context.customerRepository.findById(customerId);
     },
     paymentType: async (order, args, context, info) => {
       const { id } = order;
-      const result = await context.orderRepository.orderById(id);
+      const { paymentType } = await context.orderRepository.orderById(id);
 
-      return result[0].paymentType;
+      return paymentType;
     },
     ordered: async (order, args, context, info) => {
       const { id } = order;
-      const result = await context.orderRepository.orderById(id);
+      const { ordered } = await context.orderRepository.orderById(id);
 
-      return result[0].ordered;
+      return ordered;
     },
     shipped: async (order, args, context, info) => {
       const { id } = order;
-      const result = await context.orderRepository.orderById(id);
+      const { shipped } = await context.orderRepository.orderById(id);
 
-      return result[0].shipped;
+      return shipped;
     }
   },
   LineItem: {

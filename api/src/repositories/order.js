@@ -34,7 +34,12 @@ exports.createLoaders = () => {
         ordered: "ordered_dtm",
         shipped: "shipped_dtm"
       })
-      .then(rows => ids.map(id => rows.filter(x => +x.id === +id)));
+      .then(rows => ids.map(id => rows.find(x => +x.id === +id)))
+      .then(orders =>
+        orders.map(({ id, customerId, paymentType, ordered, shipped }) => {
+          return { id, customerId, paymentType, ordered, shipped };
+        })
+      );
   });
 
   const lineItemsByOrderIdLoader = new DataLoader(ids => {
@@ -69,7 +74,7 @@ exports.createLoaders = () => {
       })
     );
 
-    return { id: +insertedOrderId, customerId: +order.customerId };
+    return { id: +insertedOrderId };
   };
 
   return {
